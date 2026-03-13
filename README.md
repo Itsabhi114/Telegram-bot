@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 import random
 
-TOKEN = "8662928183:AAGId-ZkRay6-UD8mhkEINojC4joLMshs7U"
+TOKEN = "8701626532:AAHMn152KPbKmtrwuRhmLTFJaUCue2rW4RY"
 bot = telebot.TeleBot(TOKEN)
 
 # verification channel
